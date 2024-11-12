@@ -1,36 +1,37 @@
 #!/usr/bin/node
-const argv = process.argv;
-const urlFilm = 'https://swapi-api.hbtn.io/api/films/';
-const urlMovie = `${urlFilm}${argv[2]}/`;
-
 const request = require('request');
+const movieId = process.argv[2];
+const url = `https://swapi-api.alx-tools.com/api/films/${movieId}`;
 
-request(urlMovie, function (error, response, body) {
-  if (error == null) {
-    const fbody = JSON.parse(body);
-    const characters = fbody.characters;
-
-    if (characters && characters.length > 0) {
-      const limit = characters.length;
-      CharRequest(0, characters[0], characters, limit);
-    }
-  } else {
-    console.log(error);
-  }
-});
-
-function CharRequest (idx, url, characters, limit) {
-  if (idx === limit) {
+const getFromPeoople = (characters, index) => {
+  if (characters.length === index) {
     return;
   }
-  request(url, function (error, response, body) {
-    if (!error) {
-      const rbody = JSON.parse(body);
-      console.log(rbody.name);
-      idx++;
-      CharRequest(idx, characters[idx], characters, limit);
+
+  request(characters[index], (error, response, body) => {
+    if (error) {
+      console.log(error);
     } else {
-      console.error('error:', error);
+      console.log(JSON.parse(body).name);
+      getFromPeoople(characters, index + 1);
     }
   });
-}
+};
+request.get(url, (error, response, body) => {
+  if (error) {
+    console.log(error);
+  }
+
+  const data = JSON.parse(body).characters;
+
+  // for (const personUrl of data) {
+  //   request.get(personUrl, (error, response, body) => {
+  //     if (error) {
+  //       console.log(error);
+  //     }
+  //     const names = JSON.parse(body).name;
+  //     console.log(names);
+  //   });
+  // }
+  getFromPeoople(data, 0);
+});
